@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     if (typeof processUserMessageAmélioré === 'undefined') {
-      console.warn("Module engine-ameliore.js non chargé, utilisation du moteur standard");
+      console.warn("Module improved-engine.js non chargé, utilisation du moteur standard");
     }
     
     if (typeof enrichirReponseAvecReferencesJuridiques === 'undefined') {

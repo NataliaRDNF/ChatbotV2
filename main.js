@@ -1,11 +1,10 @@
 /**
- * Point d'entrée principal pour le chatbot LYNX
- * Intègre tous les modules et initialise le chatbot
+ * Mise à jour du fichier main.js pour intégrer le traitement amélioré des messages
  */
 
 // Attendre que le DOM soit complètement chargé
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("Initialisation du chatbot LYNX...");
+  console.log("Initialisation du chatbot LYNX avec moteur amélioré...");
   
   // Vérifier que tous les modules nécessaires sont chargés
   try {
@@ -16,6 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (typeof processUserMessage === 'undefined') {
       throw new Error("Module engine.js non chargé");
+    }
+    
+    if (typeof processUserMessageAmélioré === 'undefined') {
+      console.warn("Module engine-ameliore.js non chargé, utilisation du moteur standard");
     }
     
     if (typeof enrichirReponseAvecReferencesJuridiques === 'undefined') {
@@ -32,8 +35,33 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log("Tous les modules requis sont chargés");
     
-    // Initialiser le chatbot (cette fonction est définie dans chat-lynx.js)
-    // Le code d'initialisation spécifique est déjà présent dans chat-lynx.js
+    // Remplacer la fonction de traitement dans chat-lynx.js
+    if (typeof processUserMessageAmélioré !== 'undefined') {
+      // Sauvegarder l'ancienne fonction pour compatibilité
+      window.processUserMessageOriginal = processUserMessage;
+      
+      // Remplacer par la version améliorée
+      window.processUserMessage = function(message) {
+        try {
+          // Utiliser le moteur amélioré
+          const reponse = processUserMessageAmélioré(message);
+          
+          // Enrichir avec des références juridiques si applicable
+          if (typeof enrichirReponseAvecReferencesJuridiques === 'function') {
+            return enrichirReponseAvecReferencesJuridiques(message, reponse);
+          } else {
+            return reponse;
+          }
+        } catch (error) {
+          console.error("Erreur lors du traitement amélioré, retour à la version standard:", error);
+          // Fallback sur l'ancienne version si erreur
+          return window.processUserMessageOriginal(message);
+        }
+      };
+      
+      console.log("Moteur de traitement des messages amélioré activé");
+    }
+    
     console.log("Chatbot LYNX initialisé avec succès");
     
   } catch (error) {
@@ -43,67 +71,44 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Exposer des fonctions d'API publiques pour interaction externe
-window.LYNX = {
-  // Ouvrir la fenêtre de chat
-  open: function() {
-    const chatWindow = document.getElementById('simple-chat-window');
-    if (chatWindow) {
-      chatWindow.style.display = 'flex';
+// Mise à jour de l'API publique
+if (window.LYNX) {
+  // Ajouter de nouvelles fonctionnalités
+  window.LYNX.toggleAmelioredEngine = function(active) {
+    if (active) {
+      if (typeof processUserMessageAmélioré !== 'undefined') {
+        window.processUserMessage = function(message) {
+          const reponse = processUserMessageAmélioré(message);
+          if (typeof enrichirReponseAvecReferencesJuridiques === 'function') {
+            return enrichirReponseAvecReferencesJuridiques(message, reponse);
+          } else {
+            return reponse;
+          }
+        };
+        console.log("Moteur amélioré activé");
+        return true;
+      } else {
+        console.warn("Moteur amélioré non disponible");
+        return false;
+      }
+    } else {
+      if (typeof window.processUserMessageOriginal !== 'undefined') {
+        window.processUserMessage = window.processUserMessageOriginal;
+        console.log("Moteur standard restauré");
+        return true;
+      } else {
+        console.warn("Impossible de restaurer le moteur standard");
+        return false;
+      }
     }
-  },
+  };
   
-  // Fermer la fenêtre de chat
-  close: function() {
-    const chatWindow = document.getElementById('simple-chat-window');
-    if (chatWindow) {
-      chatWindow.style.display = 'none';
-    }
-  },
-  
-  // Envoyer un message programmatiquement
-  sendMessage: function(message) {
-    const chatInput = document.getElementById('simple-chat-input');
-    const chatSend = document.getElementById('simple-chat-send');
-    
-    if (chatInput && chatSend) {
-      chatInput.value = message;
-      
-      // Simuler un clic sur le bouton d'envoi
-      const event = new Event('click');
-      chatSend.dispatchEvent(event);
-    }
-  },
-  
-  // Réinitialiser la conversation
-  resetConversation: function() {
-    const chatMessages = document.getElementById('simple-chat-messages');
-    
-    if (chatMessages) {
-      // Vider la zone de messages sauf le message d'accueil
-      chatMessages.innerHTML = '';
-      
-      // Ajouter le message d'accueil
-      const welcomeDiv = document.createElement('div');
-      welcomeDiv.className = 'bot-message';
-      welcomeDiv.innerHTML = CONFIG?.messagesDefaut?.accueil || 
-        "Bonjour ! Je peux vous informer sur les activités autorisées ou interdites dans les différentes aires protégées du Parc naturel régional du Massif des Bauges.";
-      
-      chatMessages.appendChild(welcomeDiv);
-    }
-  },
-  
-  // Vérifier si le chatbot est chargé et fonctionnel
-  isReady: function() {
-    return typeof DATA !== 'undefined' && 
-           typeof processUserMessage !== 'undefined' && 
-           typeof enrichirReponseAvecReferencesJuridiques !== 'undefined';
-  }
-};
-
-// Exporter pour utilisation par d'autres modules si nécessaire
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    LYNX: window.LYNX
+  // Ajouter l'indication du moteur utilisé
+  window.LYNX.getEngineStatus = function() {
+    return {
+      isAmelioredActive: typeof processUserMessageAmélioré !== 'undefined' && 
+                          window.processUserMessage.toString() !== window.processUserMessageOriginal?.toString(),
+      isOriginalAvailable: typeof window.processUserMessageOriginal !== 'undefined'
+    };
   };
 }

@@ -1,141 +1,54 @@
-<!-- Chatbot LYNX pour les aires protégées du PNR du Massif des Bauges -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot LYNX - PNR du Massif des Bauges</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Conteneur du chatbot -->
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+        <!-- Bouton de chat -->
+        <button id="simple-chat-btn" data-initialized="false">
+            <img src="https://parcdesbauges.com/wp-content/uploads/2025/03/chatbotV2.webp" alt="Chatbot" style="width: 40px; height: 40px;">
+            <span class="tooltip">Chatbot</span>
+        </button>
 
-<div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
-  <!-- Bouton de chat -->
-  <button id="simple-chat-btn" data-initialized="false">
-    <img src="https://parcdesbauges.com/wp-content/uploads/2025/03/chatbotV2.webp" alt="Chatbot" style="width: 40px; height: 40px;">
-    <span class="tooltip">Chatbot</span>
-  </button>
+        <!-- Fenêtre de chat -->
+        <div id="simple-chat-window" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 350px; height: 500px; background-color: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); overflow: hidden; flex-direction: column;">
+            <!-- Entête -->
+            <div style="background-color: #958f7e; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-weight: bold;">Assistant du PNRMB</div>
+                <div id="simple-chat-close" style="cursor: pointer; font-size: 20px;">×</div>
+            </div>
 
-  <style>
-    #simple-chat-btn {
-      border: none;
-      background: #c87754;
-      cursor: pointer;
-      position: relative;
-      border-radius: 50%;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s;
-    }
+            <!-- Messages -->
+            <div id="simple-chat-messages" style="flex: 1; padding: 15px; overflow-y: auto; height: 380px; background-color: #f9f9f9;">
+                <div class="bot-message">
+                    Bonjour ! Je peux vous informer sur les activités autorisées ou interdites dans les différentes aires protégées du Parc naturel régional du Massif des Bauges.
+                    <br><br>
+                    Par exemple : "Le bivouac est-il autorisé dans la RNCFS ?" "Quelles sont les zones interdites aux chiens ?" ou "Donne la réglementation dans la Tourbière des Creusates"
+                </div>
+            </div>
 
-    #simple-chat-btn:hover {
-      transform: scale(1.1);
-    }
-
-    #simple-chat-btn .tooltip {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #333;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      opacity: 0;
-      transition: opacity 0.3s;
-      white-space: nowrap;
-      margin-bottom: 5px;
-    }
-
-    #simple-chat-btn:hover .tooltip {
-      opacity: 1;
-    }
-
-    #simple-chat-window,
-    #simple-chat-messages,
-    #simple-chat-input,
-    #simple-chat-send {
-      border-radius: 10px !important;
-    }
-
-    .user-message {
-      background-color: #A2AD00;
-      color: white;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      max-width: 80%;
-      margin-left: auto;
-    }
-
-    .bot-message {
-      background-color: #E1E1E1;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      max-width: 80%;
-    }
-
-    /* Style pour les liens dans les messages du bot */
-    .bot-message a {
-      color: #A2AD00;
-      text-decoration: underline;
-    }
-
-    /* Style pour le chargement en cours */
-    .typing-indicator {
-      display: flex;
-      justify-content: flex-start;
-      margin-bottom: 10px;
-    }
-
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      margin: 0 2px;
-      background-color: #888;
-      border-radius: 50%;
-      animation: typing-animation 1.2s infinite ease-in-out;
-    }
-
-    .typing-dot:nth-child(1) {
-      animation-delay: 0s;
-    }
-
-    .typing-dot:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .typing-dot:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-
-    @keyframes typing-animation {
-
-      0%,
-      60%,
-      100% {
-        transform: translateY(0);
-      }
-
-      30% {
-        transform: translateY(-5px);
-      }
-    }
-  </style>
-
-  <!-- Fenêtre de chat -->
-  <div id="simple-chat-window" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 350px; height: 500px; background-color: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); overflow: hidden; flex-direction: column;">
-    <!-- Entête -->
-    <div style="background-color: #958f7e; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
-      <div style="font-weight: bold;">Assistant du PNRMB</div>
-      <div id="simple-chat-close" style="cursor: pointer; font-size: 20px;">×</div>
+            <!-- Input -->
+            <div style="display: flex; padding: 10px; background-color: white; border-top: 1px solid #ddd;">
+                <input id="simple-chat-input" style="flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Posez votre question...">
+                <button id="simple-chat-send" style="margin-left: 8px; background-color: #b6ae9e; color: white; border: none; padding: 12px 16px; border-radius: 4px; cursor: pointer;">Envoyer</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Messages -->
-    <div id="simple-chat-messages" style="flex: 1; padding: 15px; overflow-y: auto; height: 380px; background-color: #f9f9f9;">
-      <div class="bot-message">
-        Bonjour ! Je peux vous informer sur les activités autorisées ou interdites dans les différentes aires protégées du Parc naturel régional du Massif des Bauges.
-        <br><br>
-        Par exemple : "Le bivouac est-il autorisé dans la RNCFS ?" "Quelles sont les zones interdites aux chiens ?" ou "Donne la réglementation dans la Tourbière des Creusates"
-      </div>
-    </div>
+    <!-- Chargement des scripts dans le bon ordre -->
+    <script src="config.js"></script>
+    <script src="articles_juridiques.js"></script>
+    <script src="references-juridiques.js"></script>
+    <script src="data-model.js"></script>
+    <script src="engine.js"></script>
+    <script src="enrichissement-juridique.js"></script>
+    <script src="chat-lynx.js"></script>
+    <script src="main.js"></script>
 
-    <!-- Input -->
-    <div style="display: flex; padding: 10px; background-color: white; border-top: 1px solid #ddd;">
-      <input id="simple-chat-input" style="flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Posez votre question...">
-      <button id="simple-chat-send" style="margin-left: 8px; background-color: #b6ae9e; color: white; border: none; padding: 12px 16px; border-radius: 4px; cursor: pointer;">Envoyer</button>
-    </div>
-  </div>
-</div>
+</body>
+</html>
